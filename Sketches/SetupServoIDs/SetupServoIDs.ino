@@ -1,3 +1,4 @@
+/* Renamed the ros.ino */
 /* 
   ArbotiX Firmware for ROS driver
   Copyright (c) 2008-2012 Vanadium Labs LLC.  All right reserved.
@@ -36,7 +37,7 @@
 #include <BioloidController.h>
 BioloidController controllers[CONTROLLER_COUNT];
 
-#include "ros.h"
+#include "SetupServoIDs.h"
 
 #ifdef USE_HW_SERVOS
   #include <HServo.h>
