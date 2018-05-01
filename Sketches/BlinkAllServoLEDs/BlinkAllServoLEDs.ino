@@ -16,32 +16,65 @@
  */
 #include <ax12.h> //ax12 library allows to send DYNAMIXEL commands
 
-void setup(){
-  Serial.println("");   
+// We assume we have 4 servos with consecutive IDs from 1 to 4
+const int MaxServoID = 4;
+
+void setup() {
   Serial.begin(9600);
   Serial.println("");   
   Serial.println("Serial Communication Established.");
+  checkVoltage();
 }
 
 unsigned long LastDisplayTime = 0;
-const unsigned long MillisecondsBetweenDisplayRefresh = 2000;
+const unsigned long millisecondsBetweenBlinks = 1000;
 
 void loop() {
   // put your main code here, to run repeatedly:
   unsigned long currentTime = millis();
-  if(currentTime - LastDisplayTime < MillisecondsBetweenDisplayRefresh){
+  if(currentTime - LastDisplayTime < millisecondsBetweenBlinks){
     return;
   }
   LastDisplayTime = currentTime; 
-  checkVoltage();
+  if(isServoLedOn(1)){
+    Serial.println("##### Turning OFF all LEDs");   
+    turnOffServoLed(DXL_BROADCAST);
+  }else{
+    Serial.println("##### Turning ON all LEDs");   
+    turnOnServoLed(DXL_BROADCAST);
+  }
+  delay(100); //Give servos some time to refresh
+  displayAllServoLedStatuses();
 }
 
-const int NumberOfServos = 4;
-const int ServoIDs[] = {1, 2, 3, 4};
+void turnOnServoLed(int servoID){
+  dxlSetLED(servoID, true); 
+}
+
+void turnOffServoLed(int servoID){
+   dxlSetLED(servoID, false);
+}
+
+bool isServoLedOn(int servoID){
+  return dxlGetLed(servoID);
+}
+
+void displayAllServoLedStatuses(){
+  for(int id = 1; id <= MaxServoID ; id++){
+    Serial.print("LED for servo ");
+    Serial.print(id);
+    Serial.print(" is: ");
+    if(isServoLedOn(id)){
+      Serial.println("ON");
+    }else{
+      Serial.println("OFF");
+    }
+  }
+}
 
 void checkVoltage(){
   //ServoIDs is optional if servos IDs are consecutive starting at 1
-  float voltage = dxlGetSystemVoltage(NumberOfServos, ServoIDs); 
+  float voltage = dxlGetSystemVoltage(MaxServoID); 
   Serial.print ("##### System Voltage: ");
   Serial.print (voltage);
   Serial.println (" volts.");
@@ -51,5 +84,7 @@ void checkVoltage(){
   }
   Serial.println("PROBLEM: Voltage level below minimum (10 V)");
   Serial.println("DANGER if you are using LiPO batteries!!!");
+  Serial.println("Program stopped");
+  while(true); //Infinite loop to avoid executing instructions that require more battery power
 }
 
