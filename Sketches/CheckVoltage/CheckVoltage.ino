@@ -20,7 +20,7 @@ void setup(){
   Serial.println("");   
   Serial.begin(9600);
   Serial.println("");   
-  Serial.println("Serial Communication Established.");
+  Serial.println("#### Serial Communication Established.");
 }
 
 unsigned long LastDisplayTime = 0;

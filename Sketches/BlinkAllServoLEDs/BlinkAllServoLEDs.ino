@@ -22,7 +22,7 @@ const int MaxServoID = 4;
 void setup() {
   Serial.begin(9600);
   Serial.println("");   
-  Serial.println("Serial Communication Established.");
+  Serial.println("#### Serial Communication Established.");
   checkVoltage();
 }
 
@@ -30,7 +30,6 @@ unsigned long LastDisplayTime = 0;
 const unsigned long millisecondsBetweenBlinks = 1000;
 
 void loop() {
-  // put your main code here, to run repeatedly:
   unsigned long currentTime = millis();
   if(currentTime - LastDisplayTime < millisecondsBetweenBlinks){
     return;

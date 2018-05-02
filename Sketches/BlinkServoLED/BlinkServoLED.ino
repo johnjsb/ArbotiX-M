@@ -23,11 +23,9 @@ int CurrentServoID = 1;
 void setup() {
   Serial.begin(9600);
   Serial.println("");   
-  Serial.println("Serial Communication Established.");
+  Serial.println("#### Serial Communication Established.");
   checkVoltage();
-  for(int id = 1; id <= MaxServoID ; id++){
-    turnOffServoLed(id);
-  }
+  turnOffServoLed(DXL_BROADCAST); //Turn OFF all servo LEDs
   turnOnServoLed(CurrentServoID);
 }
 
@@ -35,7 +33,6 @@ unsigned long LastDisplayTime = 0;
 const unsigned long millisecondsBetweenBlinks = 1000;
 
 void loop() {
-  // put your main code here, to run repeatedly:
   unsigned long currentTime = millis();
   if(currentTime - LastDisplayTime < millisecondsBetweenBlinks){
     return;
