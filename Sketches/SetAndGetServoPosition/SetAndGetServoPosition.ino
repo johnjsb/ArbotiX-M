@@ -107,7 +107,7 @@ void controlServo(){
 void waitServoPositionStablize(int servoID){
   while(dxlGetMoving(SelectedServoID)){
     delay(200);
-  };
+  }
 }
 
 void turnOnServoLed(int servoID){
