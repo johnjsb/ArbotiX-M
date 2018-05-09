@@ -15,6 +15,9 @@
  * 
  */
 #include <ax12.h> //ax12 library allows to send DYNAMIXEL commands
+#include <BioloidController.h>
+
+BioloidController controller = BioloidController(1000000); //1000000 = bauds for control
 
 void setup() {
   Serial.begin(9600);
@@ -24,7 +27,6 @@ void setup() {
   Serial.println("#### WARNING: Ensure ALL 4 servos can freely rotate");
   Serial.println("Type 'R' once you are ready"); 
   while(!isReady());
-  dxlSetGoalSpeed(DXL_BROADCAST, 180); // Set speed to 20 RPM : slow enough to watch synchronized movements
 }
 
 boolean isReady(){
@@ -38,34 +40,33 @@ boolean isReady(){
   return false;
 }
 
-unsigned long LastMotionTime = 0;
-const unsigned long millisecondsBetweenMovements = 2000;
-
 // We assume we have 4 servos with consecutive IDs from 1 to 4
 const int MaxServoID = 4;
-const int rightPositions[4][2] = {{1, 200}, {2, 200}, {3, 200}, {4, 200}};
-const int leftPositions[4][2] = {{1, 800}, {2, 800}, {3, 800}, {4, 800}};
+const PROGMEM unsigned int rightPositions[] = {MaxServoID, 200, 300, 400, 500};
+const PROGMEM unsigned int leftPositions[] = {MaxServoID, 1000, 900, 800, 700};
 
 bool shouldMoveToTheLeft = true;
 
 void loop() {
-  unsigned long currentTime = millis();
-  if(currentTime - LastMotionTime < millisecondsBetweenMovements){
-    return;
-  }
- // Ensure servo 1 finished moving. All servos finish at the same time because movements are synchronized
- if(dxlGetMoving(1)){
-    return;
-  }
-    if(shouldMoveToTheLeft){
+  if(shouldMoveToTheLeft){
     Serial.println("<<<< Moving all servos to the left");
-    dxlSyncWritePosition(leftPositions, MaxServoID);
+    moveTo(leftPositions, 1000);
   }else{
     Serial.println(">>>> Moving all servos to the right");
-    dxlSyncWritePosition(rightPositions, MaxServoID);
+    moveTo(rightPositions, 3000);
   }
   shouldMoveToTheLeft = !shouldMoveToTheLeft;
-  LastMotionTime = millis(); 
+}
+
+void moveTo(unsigned int * pose, int motionDurationInMilliseconds){
+    delay(100); // Recommanded pause
+    controller.loadPose(pose);   // load the pose from FLASH, into the nextPose buffer
+    controller.readPose();       // read in current servo positions to the curPose buffer
+    controller.interpolateSetup(motionDurationInMilliseconds); 
+    while(controller.interpolating > 0){  // do this while we have not reached our new pose
+        controller.interpolateStep();     // move servos, if necessary. 
+        delay(3);
+    }  
 }
 
 void checkVoltage(){
