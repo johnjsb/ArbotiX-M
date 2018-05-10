@@ -19,6 +19,21 @@
 
 BioloidController controller = BioloidController(1000000); //1000000 = bauds for control
 
+// We assume we have 4 servos with consecutive IDs from 1 to 4
+const int MaxServoID = 4;
+const PROGMEM unsigned int rightPositions[] = {MaxServoID, 0, 100, 200, 300};
+const PROGMEM unsigned int intermediatePositions[] = {MaxServoID, 500, 500, 500, 500};
+const PROGMEM unsigned int leftPositions[] = {MaxServoID, 1000, 900, 800, 700};
+
+const int sequenceSteps = 5;
+const PROGMEM transition_t movementSequence[] = {{NULL, sequenceSteps}, 
+  {leftPositions, 3000},
+  {rightPositions, 3000}, 
+  {intermediatePositions, 2000}, 
+  {rightPositions, 4000}, 
+  {intermediatePositions, 3000}
+};
+
 void setup() {
   Serial.begin(9600);
   Serial.println("");   
@@ -27,7 +42,22 @@ void setup() {
   Serial.println("#### WARNING: Ensure ALL 4 servos can freely rotate");
   Serial.println("Type 'R' once you are ready"); 
   while(!isReady());
+  Serial.println("#### Moving servos to initial positions...");  
+  moveTo(intermediatePositions, 3000);
+  Serial.println("... DONE moving servos to initial positions");  
 }
+
+void moveTo(unsigned int * pose, int motionDurationInMilliseconds){
+    delay(100); // Recommanded pause
+    controller.loadPose(pose);   // load the pose from FLASH, into the nextPose buffer
+    controller.readPose();       // read in current servo positions to the curPose buffer
+    controller.interpolateSetup(motionDurationInMilliseconds); 
+    while(controller.interpolating > 0){  // do this while we have not reached our new pose
+        controller.interpolateStep();     // move servos, if necessary. 
+        delay(1);
+    }  
+}
+
 
 boolean isReady(){
   delay(500); 
@@ -40,33 +70,14 @@ boolean isReady(){
   return false;
 }
 
-// We assume we have 4 servos with consecutive IDs from 1 to 4
-const int MaxServoID = 4;
-const PROGMEM unsigned int rightPositions[] = {MaxServoID, 200, 300, 400, 500};
-const PROGMEM unsigned int leftPositions[] = {MaxServoID, 1000, 900, 800, 700};
-
-bool shouldMoveToTheLeft = true;
-
 void loop() {
-  if(shouldMoveToTheLeft){
-    Serial.println("<<<< Moving all servos to the left");
-    moveTo(leftPositions, 1000);
-  }else{
-    Serial.println(">>>> Moving all servos to the right");
-    moveTo(rightPositions, 3000);
-  }
-  shouldMoveToTheLeft = !shouldMoveToTheLeft;
-}
-
-void moveTo(unsigned int * pose, int motionDurationInMilliseconds){
-    delay(100); // Recommanded pause
-    controller.loadPose(pose);   // load the pose from FLASH, into the nextPose buffer
-    controller.readPose();       // read in current servo positions to the curPose buffer
-    controller.interpolateSetup(motionDurationInMilliseconds); 
-    while(controller.interpolating > 0){  // do this while we have not reached our new pose
-        controller.interpolateStep();     // move servos, if necessary. 
+    Serial.println(">>>> Start a new sequence ...");
+    controller.playSeq(movementSequence); // Load sequence
+    while(controller.playing){  // While sequence not finished
+        controller.play();     // Play sequence step
         delay(1);
     }  
+    Serial.println("... DONE playing sequence <<<<");
 }
 
 void checkVoltage(){
