@@ -1,5 +1,5 @@
 # ArbotiX-M
-All you need to setup and use the ArbotiX-M board for your robotics projects with the Arduino IDE 1.8.
+All you need to setup and use the ArbotiX-M board and Dynamixel servos. Code provided in this GitHub repo also gathers many sketches for making software for robotic arms and legged robots. All were tested with the Arduino IDE 1.8.
 
 Most sketches available here are new. Other materials were forked from:
 * https://github.com/Interbotix/arbotix
