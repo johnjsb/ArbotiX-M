@@ -1,7 +1,7 @@
 # ArbotiX-M
 All you need to setup and use the ArbotiX-M board for your robotics projects with the Arduino IDE 1.8.
 
-Many sketches available here are new. Other materials were forked from:
+Most sketches available here are new. Other materials were forked from:
 * https://github.com/Interbotix/arbotix
 * https://github.com/Interbotix/arbotix/tree/arduino-1-6
 
